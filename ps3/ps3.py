@@ -16,8 +16,10 @@ CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 7
 
 SCRABBLE_LETTER_VALUES = {
-    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
-}
+    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 
+    'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 
+    's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10, '*': 0
+}                                                                               # '*' has a value of 0
 
 # -----------------------------------
 # Helper code
@@ -223,9 +225,9 @@ def is_valid_word(word, hand, word_list):
         possible_words.append(word)
     
     # DEBUGGING ---------------------------------------------------------------
-    print('---------------------------------------')
-    print('Possible words:',possible_words)
-    print('Hand:', hand)    
+    #print('---------------------------------------')
+    #print('Possible words:',possible_words)
+    #print('Hand:', hand)    
     # -------------------------------------------------------------------------
     
     
@@ -234,11 +236,11 @@ def is_valid_word(word, hand, word_list):
             possible_wordlist_words.append(i)
     if not possible_wordlist_words:
     # DEBUGGING ---------------------------------------------------------------
-        print('Word:',word,'is not in wordlist')  
+        #print('Word:',word,'is not in wordlist')  
     # -------------------------------------------------------------------------
         return False
     
-    print('Total possible words:', len(possible_wordlist_words))
+    # DEBUGGING: print('Total possible words:', len(possible_wordlist_words))
     
     for i in possible_wordlist_words:                               # Checking possible words in hand
         copy_hand = hand.copy()                                                 # Create a copy of hand
@@ -248,7 +250,7 @@ def is_valid_word(word, hand, word_list):
             else:                                                                   
                 invalid_count +=1                                               # Increment invalid count
                 break
-        print('Copy_hand:', copy_hand)
+        #DEBUGGING: print('Copy_hand:', copy_hand)
                 
     if invalid_count == 5 and wild_flag == 1:        
         return False                                                           
@@ -376,10 +378,28 @@ def substitute_hand(hand, letter):
     letter: string
     returns: dictionary (string -> int)
     """
+    # Ensure the letter is in the hand
+    if letter not in hand or hand[letter] == 0:
+        print('Input is not in hand.')
+        return hand
     
-    pass  # TO DO... Remove this line when you implement this function
-       
+    # Replace letter 
+    if letter in VOWELS:
+        available_letters = set(VOWELS) - set(hand.keys())
+    else:
+        available_letters = set(CONSONANTS) - set(hand.keys())
     
+    if not available_letters:
+        print('No more available letters.')
+        return hand
+    
+    # Choose a new letter and update the hand
+    new_letter = random.choice(list(available_letters))
+    hand[new_letter] = hand.get(new_letter, 0) + hand[letter]
+    del hand[letter]
+    
+    return hand
+
 def play_game(word_list):
     """
     Allow the user to play a series of hands
