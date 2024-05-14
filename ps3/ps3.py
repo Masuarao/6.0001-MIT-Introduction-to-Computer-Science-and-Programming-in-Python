@@ -151,7 +151,7 @@ def deal_hand(n):
     hand={}
     hand['*'] = 1                                                               # Guarantee a wildcard
     num_vowels = int(math.ceil(n / 3)) - 1                                      # Calculate vowels
-    if num_vowels < 2:
+    if num_vowels < 1:
         num_vowels = 0
     
     for i in range(num_vowels):                                                 # Deal vowels and cononants 
@@ -242,7 +242,7 @@ def is_valid_word(word, hand, word_list):
     
     # DEBUGGING: print('Total possible words:', len(possible_wordlist_words))
     
-    for i in possible_wordlist_words:                               # Checking possible words in hand
+    for i in possible_wordlist_words:                                           # Checking possible words in hand
         copy_hand = hand.copy()                                                 # Create a copy of hand
         for j in range(len(i)):                                                                      
             if (copy_hand.get(i[j],0) != 0):                                           
@@ -309,11 +309,11 @@ def play_hand(hand, word_list):
     
     # As long as there are still letters left in the hand:
     while calculate_handlen(hand) > 0:
-        
-        display_hand(hand)                                                           # Display the hand
+        print('Current hand:',end=' ')
+        display_hand(hand)                                                      # Display the hand
         
         word = input('Enter word, or '+'"'+'!!'+'"'+
-                     ' to indicate that you are finished:')                     # Ask user for input
+                     ' to indicate that you are finished: ')                    # Ask user for input
         
         # If the input is two exclamation points:
         if word == '!!':
@@ -332,9 +332,10 @@ def play_hand(hand, word_list):
                 print('That is not a valid word. Please choose another word.')  # Reject invalid word (print a message)
 
         hand = update_hand(hand, word)                                          # update the user's hand by removing the letters of their inputted word
-                
+        
+        print("")        
     if word == '!!':
-        print('Total Score:',score)
+        print('Total Score for this hand:',score)
     else:
         print('Ran out of letters. Total score:',score)
             
@@ -431,8 +432,87 @@ def play_game(word_list):
     word_list: list of lowercase strings
     """
     
-    print("play_game not implemented.") # TO DO... Remove this line when you implement this function
+    def get_hand_num():
+        '''
+        Asks user for number of hands played until receives a valid input. 
+        Returns integer for number of hands to be played
+
+        '''
+        valid = 0                                                               # Valid flag
+        
+        
+        while valid == 0:                                                       # Keep asking for user input unless valid input
+            hand_num = input('Enter total number of hands: ')                   # Get use input
+            try:
+                hand_num = int(hand_num)
+                valid = 1
+            except: 
+                print("Please enter a valid input")
+        return hand_num
     
+    def request_replay():
+        '''
+        Prompts user to replay game
+        Includes error handling for invalid input 
+        
+        '''
+        print('----------')
+        valid_input_flag = False
+        
+        while not valid_input_flag:                                             # Loop until valid input
+            replay_input = input('Would you like to replay the hand? ')
+            replay_input = replay_input.lower()
+            
+            if replay_input =='yes' or replay_input =='no':
+                valid_input_flag = True
+            else: 
+                print('Invalid input, please try again.')
+        
+        if replay_input == 'yes':                                               # Return the valid input
+            return True
+        else:
+            return False
+        
+    def request_substitute(hand):
+        print('Current hand:',end=' ')                                          # Display current hand
+        display_hand(hand)
+        valid_input_flag = False
+           
+        while not valid_input_flag:                                             # Prompt until valid input
+            replay_input = input('Would you like to substitute a letter? ')                          
+            replay_input = replay_input.lower()
+
+            if replay_input =='yes' or replay_input =='no':                 
+                valid_input_flag = True
+            else: 
+                print('Invalid input, please try again.')
+        
+        if replay_input == 'yes':                                               # Return the valid input
+            letter = input('Choose letter to substitute: ')    
+            hand = substitute_hand(hand, letter)
+            return hand
+        else:
+            return hand
+        
+                                                                                # Initialise the Game
+    handsize = 6                                                                # Standard scrabble handsize: 6 letters 1 wildcard      
+    total_score = 0                                                             # Store score here 
+    hand_num = get_hand_num()                                                   # Get number of hands to be played
+        
+    while hand_num > 0:                                                         # For each hand
+        
+        hand = deal_hand(handsize)                                              # Deal hand
+        replay_flag = True                                                      # Set replay to be true
+        request_substitute(hand)                                                # Request substitute
+        
+        while replay_flag:                                                      # Replay if replay is true
+            round_score = play_hand(hand, word_list)
+            replay_flag = request_replay()
+        total_score = total_score + round_score
+        hand_num -= 1
+    
+    print("----------")
+    print('Total score over all hands:', total_score)                           # Print total score at the end
 
 
 #
